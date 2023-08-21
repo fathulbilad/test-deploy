@@ -10,4 +10,4 @@ COPY . /app/
 
 EXPOSE 3020
 
-CMD ["node", "serveradm.js"]
+CMD ["node", "index.js"]
