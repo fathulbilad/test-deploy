@@ -29,7 +29,7 @@ pipeline {
         stage('Building') {
             steps {
                 script {
-                    sh "docker build --rm -t ${registry}/jenkins/${appName}:${tag} ."
+                    sh "docker build --rm -t ${registry}/test-deploy/${appName}:${tag} ."
                     // sh "echo building"
                 }
             }
@@ -38,7 +38,7 @@ pipeline {
         stage('Push image ke registry') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'harbor', passwordVariable: 'password', usernameVariable: 'username')]) {
-                  sh "docker login -u ${username} -p ${password} ${registry} && docker push ${registry}/jenkins/${appName}:${tag}"
+                  sh "docker login -u ${username} -p ${password} ${registry} && docker push ${registry}/test-deploy/${appName}:${tag}"
                 }           
                 // sh "echo Push"
             }
@@ -52,7 +52,7 @@ pipeline {
                             sh "ssh -o StrictHostKeyChecking=no -l root 8.215.29.125 'kubectl delete deployment,service ${appName} --namespace=${namespace}'"
                                 // sh "ssh -o StrictHostKeyChecking=no -l root 8.215.29.125 'kubectl delete service ${appName} --namespace=${namespace}'"
                         } catch (Exception e) {}
-                        sh "ssh -o StrictHostKeyChecking=no -l root 8.215.29.125 'kubectl create deployment ${appName} --namespace=${namespace} --image=nexus.isupplier-portal.com/jenkins/${appName}:${tag} -- replicas=2'"
+                        sh "ssh -o StrictHostKeyChecking=no -l root 8.215.29.125 'kubectl create deployment ${appName} --namespace=${namespace} --image=nexus.isupplier-portal.com/test-deploy/${appName}:${tag} -- replicas=2'"
                         sh "ssh -o StrictHostKeyChecking=no -l root 8.215.29.125 'kubectl scale deployment ${appName} --namespace=${namespace} --replicas=${replicas}'"
                         sh "ssh -o StrictHostKeyChecking=no -l root 8.215.29.125 'kubectl expose deployment ${appName} --namespace=${namespace} --port=${port} --target-port=${targetPort}'"
                         sh "ssh -o StrictHostKeyChecking=no -l root 8.215.29.125 'kubectl set env deployment ${appName} --namespace=${namespace} NODE_ENV=development'"
